@@ -36,12 +36,31 @@ func (c *Contract) aoAction(data string, tags []types.Tag) ([]byte, error) {
 	return result.Messages[0]["Data"].([]byte), nil
 }
 
-func (c *Contract) Balance() (string, error) {
-	res, err := c.aoAction("", []types.Tag{{Name: "Action", Value: "Balance"}})
+func (c *Contract) Balance(id string) (string, error) {
+	tags := []types.Tag{
+		{Name: "Action", Value: "Balance"},
+	}
+	res, err := c.aoAction(id, tags)
 	if err != nil {
 		return "", err
 	}
 	return string(res), nil
+}
+
+func (c *Contract) Balances() (*map[string]string, error) {
+	tags := []types.Tag{
+		{Name: "Action", Value: "Balances"},
+	}
+	res, err := c.aoAction("", tags)
+	if err != nil {
+		return nil, err
+	}
+	var balances map[string]string
+	err = json.Unmarshal(res, &balances)
+	if err != nil {
+		return nil, err
+	}
+	return &balances, nil
 }
 
 func (c *Contract) Initiate(dataItemId string, size uint) (*Staker, error) {
@@ -83,11 +102,32 @@ func (c *Contract) Stake(url string) error {
 	return err
 }
 
-func (c *Contract) Unstake() error {
-	_, err := c.ao.SendMessage(PROCESS, "", []types.Tag{{Name: "Action", Value: "Unstake"}}, "", c.signer)
-	return err
+func (c *Contract) Staked() (string, error) {
+	tags := []types.Tag{
+		{Name: "Action", Value: "Staked"},
+	}
+	res, err := c.aoAction("", tags)
+	if err != nil {
+		return "", err
+	}
+	return string(res), nil
 }
 
+func (c *Contract) Stakers() (*[]Staker, error) {
+	tags := []types.Tag{
+		{Name: "Action", Value: "Stakers"},
+	}
+	res, err := c.aoAction("", tags)
+	if err != nil {
+		return nil, err
+	}
+	var stakers []Staker
+	err = json.Unmarshal(res, &stakers)
+	if err != nil {
+		return nil, err
+	}
+	return &stakers, nil
+}
 
 func (c *Contract) Transfer(recipient string, quantity string) error {
 	tags := []types.Tag{
@@ -97,4 +137,25 @@ func (c *Contract) Transfer(recipient string, quantity string) error {
 	}
 	_, err := c.ao.SendMessage(PROCESS, "", tags, "", c.signer)
 	return err
+}
+
+func (c *Contract) Unstake() error {
+	_, err := c.ao.SendMessage(PROCESS, "", []types.Tag{{Name: "Action", Value: "Unstake"}}, "", c.signer)
+	return err
+}
+
+func (c *Contract) Upload(id string) (*Upload, error) {
+	tags := []types.Tag{
+		{Name: "Action", Value: "Stakers"},
+	}
+	res, err := c.aoAction(id, tags)
+	if err != nil {
+		return nil, err
+	}
+	var upload Upload
+	err = json.Unmarshal(res, &upload)
+	if err != nil {
+		return nil, err
+	}
+	return &upload, nil
 }
