@@ -4,7 +4,7 @@ go 1.22.1
 
 require (
 	github.com/everFinance/goar v1.6.3
-	github.com/liteseed/aogo v0.0.6
+	github.com/liteseed/aogo v0.0.8
 )
 
 require (

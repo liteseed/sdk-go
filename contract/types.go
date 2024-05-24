@@ -2,7 +2,7 @@ package contract
 
 type Staker struct {
 	ID         string `json:"id"`
-	Reputation string `json:"reputation"`
+	Reputation int    `json:"reputation"`
 	URL        string `json:"url"`
 }
 

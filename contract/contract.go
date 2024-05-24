@@ -3,67 +3,74 @@ package contract
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 
 	"github.com/everFinance/goar"
 	"github.com/everFinance/goar/types"
 	"github.com/liteseed/aogo"
 )
 
-const PROCESS = ""
-
 type Contract struct {
-	ao     *aogo.AO
-	signer *goar.ItemSigner
+	ao      *aogo.AO
+	process string
+	signer  *goar.Signer
 }
 
-func New(ao *aogo.AO, process string, signer *goar.ItemSigner) *Contract {
+func New(ao *aogo.AO, process string, signer *goar.Signer) *Contract {
 	return &Contract{
-		ao:     ao,
-		signer: signer,
+		ao:      ao,
+		process: process,
+		signer:  signer,
 	}
 }
 
 func (c *Contract) aoAction(data string, tags []types.Tag) ([]byte, error) {
-	mId, err := c.ao.SendMessage(PROCESS, data, tags, "", c.signer)
+	itemSigner, err := goar.NewItemSigner(c.signer)
+	if err != nil {
+		return nil, err
+	}
+	log.Println(c.process)
+	mId, err := c.ao.SendMessage(c.process, data, tags, "", itemSigner)
 	if err != nil {
 		return nil, err
 	}
 
-	result, err := c.ao.ReadResult(PROCESS, mId)
+	result, err := c.ao.LoadResult(c.process, mId)
 	if err != nil {
 		return nil, err
 	}
-	return result.Messages[0]["Data"].([]byte), nil
+	return []byte(result.Messages[0]["Data"].(string)), nil
 }
 
-func (c *Contract) Balance(id string) (string, error) {
-	tags := []types.Tag{
-		{Name: "Action", Value: "Balance"},
-	}
-	res, err := c.aoAction(id, tags)
+func (c *Contract) Balance(target string) (string, error) {
+	res, err := c.ao.DryRun(aogo.Message{
+		Target: c.process,
+		Owner:  c.signer.Address,
+		Tags:   []types.Tag{{Name: "Action", Value: "Balance"}, {Name: "Target", Value: target}},
+	})
 	if err != nil {
 		return "", err
 	}
-	return string(res), nil
+	return res.Messages[0]["Data"].(string), nil
 }
 
 func (c *Contract) Balances() (*map[string]string, error) {
 	tags := []types.Tag{
 		{Name: "Action", Value: "Balances"},
 	}
-	res, err := c.aoAction("", tags)
+	res, err := c.ao.DryRun(aogo.Message{Target: c.process, Owner: c.signer.Address, Tags: tags})
 	if err != nil {
 		return nil, err
 	}
 	var balances map[string]string
-	err = json.Unmarshal(res, &balances)
+	err = json.Unmarshal([]byte(res.Messages[0]["Data"].(string)), &balances)
 	if err != nil {
 		return nil, err
 	}
 	return &balances, nil
 }
 
-func (c *Contract) Initiate(dataItemId string, size uint) (*Staker, error) {
+func (c *Contract) Initiate(dataItemId string, size int) (*Staker, error) {
 	tags := []types.Tag{
 		{Name: "Action", Value: "Initiate"},
 		{Name: "Size", Value: fmt.Sprint(size)},
@@ -81,24 +88,38 @@ func (c *Contract) Initiate(dataItemId string, size uint) (*Staker, error) {
 }
 
 func (c *Contract) Posted(dataItemId string, transactionId string) error {
-	tags := []types.Tag{
-		{Name: "Action", Value: "Posted"},
-		{Name: "Transaction", Value: transactionId},
+	itemSigner, err := goar.NewItemSigner(c.signer)
+	if err != nil {
+		return err
 	}
-	_, err := c.ao.SendMessage(PROCESS, "", tags, dataItemId, c.signer)
+	_, err = c.ao.SendMessage(c.process, "", []types.Tag{{Name: "Action", Value: "Posted"}, {Name: "Transaction", Value: transactionId}}, dataItemId, itemSigner)
 	return err
 }
 
 func (c *Contract) Release(dataItemId string, transactionId string) error {
-	tags := []types.Tag{
-		{Name: "Action", Value: "Release"},
+	itemSigner, err := goar.NewItemSigner(c.signer)
+	if err != nil {
+		return err
 	}
-	_, err := c.ao.SendMessage(PROCESS, "", tags, dataItemId, c.signer)
+	_, err = c.ao.SendMessage(c.process, "", []types.Tag{{Name: "Action", Value: "Release"}}, dataItemId, itemSigner)
 	return err
 }
 
 func (c *Contract) Stake(url string) error {
-	_, err := c.ao.SendMessage(PROCESS, "", []types.Tag{{Name: "Action", Value: "Stake"}, {Name: "Url", Value: url}}, "", c.signer)
+	itemSigner, err := goar.NewItemSigner(c.signer)
+	if err != nil {
+		return err
+	}
+	mid, err := c.ao.SendMessage(c.process, "", []types.Tag{{Name: "Action", Value: "Stake"}, {Name: "Url", Value: url}}, "", itemSigner)
+	log.Println(mid)
+	if err != nil {
+		return err
+	}
+	result, err := c.ao.LoadResult(c.process, mid)
+	log.Println(result)
+	if err != nil {
+		return err
+	}
 	return err
 }
 
@@ -106,11 +127,11 @@ func (c *Contract) Staked() (string, error) {
 	tags := []types.Tag{
 		{Name: "Action", Value: "Staked"},
 	}
-	res, err := c.aoAction("", tags)
+	res, err := c.ao.DryRun(aogo.Message{Target: c.process, Data: c.signer.Address, Owner: c.signer.Address, Tags: tags})
 	if err != nil {
 		return "", err
 	}
-	return string(res), nil
+	return res.Messages[0]["Data"].(string), nil
 }
 
 func (c *Contract) Stakers() (*[]Staker, error) {
@@ -130,17 +151,20 @@ func (c *Contract) Stakers() (*[]Staker, error) {
 }
 
 func (c *Contract) Transfer(recipient string, quantity string) error {
-	tags := []types.Tag{
-		{Name: "Action", Value: "Transfer"},
-		{Name: "Recipient", Value: recipient},
-		{Name: "Quantity", Value: quantity},
+	itemSigner, err := goar.NewItemSigner(c.signer)
+	if err != nil {
+		return err
 	}
-	_, err := c.ao.SendMessage(PROCESS, "", tags, "", c.signer)
+	_, err = c.ao.SendMessage(c.process, "", []types.Tag{{Name: "Action", Value: "Transfer"}, {Name: "Recipient", Value: recipient}, {Name: "Quantity", Value: quantity}}, "", itemSigner)
 	return err
 }
 
 func (c *Contract) Unstake() error {
-	_, err := c.ao.SendMessage(PROCESS, "", []types.Tag{{Name: "Action", Value: "Unstake"}}, "", c.signer)
+	itemSigner, err := goar.NewItemSigner(c.signer)
+	if err != nil {
+		return err
+	}
+	_, err = c.ao.SendMessage(c.process, "", []types.Tag{{Name: "Action", Value: "Unstake"}}, "", itemSigner)
 	return err
 }
 
