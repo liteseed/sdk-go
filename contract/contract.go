@@ -16,7 +16,12 @@ type Contract struct {
 	signer  *goar.Signer
 }
 
-func New(ao *aogo.AO, process string, signer *goar.Signer) *Contract {
+func New(process string, signer *goar.Signer) *Contract {
+	ao, err := aogo.New()
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	return &Contract{
 		ao:      ao,
 		process: process,
@@ -45,8 +50,8 @@ func (c *Contract) aoAction(data string, tags []types.Tag) ([]byte, error) {
 func (c *Contract) Balance(target string) (string, error) {
 	res, err := c.ao.DryRun(aogo.Message{
 		Target: c.process,
-		Owner:  c.signer.Address,
-		Tags:   []types.Tag{{Name: "Action", Value: "Balance"}, {Name: "Target", Value: target}},
+		Owner:  target,
+		Tags:   []types.Tag{{Name: "Action", Value: "Balance"}},
 	})
 	if err != nil {
 		return "", err
