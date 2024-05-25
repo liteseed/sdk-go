@@ -110,22 +110,23 @@ func (c *Contract) Release(dataItemId string, transactionId string) error {
 	return err
 }
 
-func (c *Contract) Stake(url string) error {
+func (c *Contract) Stake(url string) (string, error) {
 	itemSigner, err := goar.NewItemSigner(c.signer)
 	if err != nil {
-		return err
+		return "", err
 	}
-	mid, err := c.ao.SendMessage(c.process, "", []types.Tag{{Name: "Action", Value: "Stake"}, {Name: "Url", Value: url}}, "", itemSigner)
-	log.Println(mid)
+	mId, err := c.ao.SendMessage(c.process, "", []types.Tag{{Name: "Action", Value: "Stake"}, {Name: "Url", Value: url}}, "", itemSigner)
 	if err != nil {
-		return err
+		return "", err
 	}
-	result, err := c.ao.LoadResult(c.process, mid)
-	log.Println(result)
+	result, err := c.ao.LoadResult(c.process, mId)
 	if err != nil {
-		return err
+		return "", err
 	}
-	return err
+	if result.Error != "" {
+		return "", fmt.Errorf(result.Error)
+	}
+	return result.Messages[0]["Data"].(string), nil
 }
 
 func (c *Contract) Staked() (string, error) {
@@ -164,13 +165,21 @@ func (c *Contract) Transfer(recipient string, quantity string) error {
 	return err
 }
 
-func (c *Contract) Unstake() error {
+func (c *Contract) Unstake() (string, error) {
 	itemSigner, err := goar.NewItemSigner(c.signer)
 	if err != nil {
-		return err
+		return  "", err
 	}
-	_, err = c.ao.SendMessage(c.process, "", []types.Tag{{Name: "Action", Value: "Unstake"}}, "", itemSigner)
-	return err
+	mId, err := c.ao.SendMessage(c.process, "", []types.Tag{{Name: "Action", Value: "Unstake"}}, "", itemSigner)
+
+	result, err := c.ao.LoadResult(c.process, mId)
+	if err != nil {
+		return "", err
+	}
+	if result.Error != "" {
+		return "", fmt.Errorf(result.Error)
+	}
+	return result.Messages[0]["Data"].(string), nil
 }
 
 func (c *Contract) Upload(id string) (*Upload, error) {
