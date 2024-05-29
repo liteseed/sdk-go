@@ -34,7 +34,6 @@ func (c *Contract) aoAction(data string, tags []types.Tag) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	log.Println(c.process)
 	mId, err := c.ao.SendMessage(c.process, data, tags, "", itemSigner)
 	if err != nil {
 		return nil, err
@@ -45,6 +44,25 @@ func (c *Contract) aoAction(data string, tags []types.Tag) ([]byte, error) {
 		return nil, err
 	}
 	return []byte(result.Messages[0]["Data"].(string)), nil
+}
+
+func (c *Contract) Info() (*Info, error) {
+	res, err := c.ao.DryRun(
+		aogo.Message{
+			Target: c.process,
+			Owner: c.signer.Address,
+			Tags:   []types.Tag{{Name: "Action", Value: "Info"}},
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+	var info Info
+	err = json.Unmarshal([]byte(res.Messages[0]["Data"].(string)), &info)
+	if err != nil {
+		return nil, err
+	}
+	return &info, nil
 }
 
 func (c *Contract) Balance(target string) (string, error) {
@@ -168,9 +186,12 @@ func (c *Contract) Transfer(recipient string, quantity string) error {
 func (c *Contract) Unstake() (string, error) {
 	itemSigner, err := goar.NewItemSigner(c.signer)
 	if err != nil {
-		return  "", err
+		return "", err
 	}
 	mId, err := c.ao.SendMessage(c.process, "", []types.Tag{{Name: "Action", Value: "Unstake"}}, "", itemSigner)
+	if err != nil {
+		return "", err
+	}
 
 	result, err := c.ao.LoadResult(c.process, mId)
 	if err != nil {

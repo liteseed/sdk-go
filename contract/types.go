@@ -13,3 +13,11 @@ type Upload struct {
 	Transaction string `json:"transaction"`
 	Paid        string `json:"paid"`
 }
+
+type Info struct {
+	Target       string `json:"Target"`
+	Name         string `json:"Name"`
+	Ticker       string `json:"Ticker"`
+	Logo         string `json:"Logo"`
+	Denomination string `json:"Denomination"`
+}
