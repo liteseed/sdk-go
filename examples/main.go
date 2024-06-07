@@ -13,7 +13,7 @@ const PROCESS = "PWSr59Cf6jxY7aA_cfz69rs0IiJWWbmQA8bAKknHeMo"
 
 func main() {
 
-	bundler, err := signer.FromPath("./run/bundler.json")
+	bundler, err := signer.FromPath("./examples/bundler.json")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -57,7 +57,7 @@ func main() {
 	}
 	log.Println(staked)
 
-	user, err := signer.FromPath("./run/user.json")
+	user, err := signer.FromPath("./examples/user.json")
 	if err != nil {
 		log.Fatal(err)
 	}
