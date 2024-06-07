@@ -3,3 +3,6 @@
 
 run
 signer.json
+bundler.json
+user.json
+*.json
