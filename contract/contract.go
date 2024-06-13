@@ -7,7 +7,7 @@ import (
 
 	"github.com/liteseed/aogo"
 	"github.com/liteseed/goar/signer"
-	"github.com/liteseed/goar/types"
+	"github.com/liteseed/goar/tag"
 )
 
 type Contract struct {
@@ -29,7 +29,7 @@ func New(process string, signer *signer.Signer) *Contract {
 	}
 }
 
-func (c *Contract) aoAction(data string, tags []types.Tag) ([]byte, error) {
+func (c *Contract) aoAction(data string, tags []tag.Tag) ([]byte, error) {
 	mId, err := c.ao.SendMessage(c.process, data, tags, "", c.signer)
 	if err != nil {
 		return nil, err
@@ -47,7 +47,7 @@ func (c *Contract) Info() (*Info, error) {
 		aogo.Message{
 			Target: c.process,
 			Owner:  c.signer.Address,
-			Tags:   []types.Tag{{Name: "Action", Value: "Info"}},
+			Tags:   []tag.Tag{{Name: "Action", Value: "Info"}},
 		},
 	)
 	if err != nil {
@@ -65,7 +65,7 @@ func (c *Contract) Balance(target string) (string, error) {
 	res, err := c.ao.DryRun(aogo.Message{
 		Target: c.process,
 		Owner:  target,
-		Tags:   []types.Tag{{Name: "Action", Value: "Balance"}},
+		Tags:   []tag.Tag{{Name: "Action", Value: "Balance"}},
 	})
 	if err != nil {
 		return "", err
@@ -74,7 +74,7 @@ func (c *Contract) Balance(target string) (string, error) {
 }
 
 func (c *Contract) Balances() (*map[string]string, error) {
-	tags := []types.Tag{
+	tags := []tag.Tag{
 		{Name: "Action", Value: "Balances"},
 	}
 	res, err := c.ao.DryRun(aogo.Message{Target: c.process, Owner: c.signer.Address, Tags: tags})
@@ -90,7 +90,7 @@ func (c *Contract) Balances() (*map[string]string, error) {
 }
 
 func (c *Contract) Initiate(dataItemId string, size int) (*Staker, error) {
-	tags := []types.Tag{
+	tags := []tag.Tag{
 		{Name: "Action", Value: "Initiate"},
 		{Name: "Size", Value: fmt.Sprint(size)},
 	}
@@ -107,17 +107,17 @@ func (c *Contract) Initiate(dataItemId string, size int) (*Staker, error) {
 }
 
 func (c *Contract) Posted(dataItemId string, transactionId string) error {
-	_, err := c.ao.SendMessage(c.process, "", []types.Tag{{Name: "Action", Value: "Posted"}, {Name: "Transaction", Value: transactionId}}, dataItemId, c.signer)
+	_, err := c.ao.SendMessage(c.process, "", []tag.Tag{{Name: "Action", Value: "Posted"}, {Name: "Transaction", Value: transactionId}}, dataItemId, c.signer)
 	return err
 }
 
 func (c *Contract) Release(dataItemId string, transactionId string) error {
-	_, err := c.ao.SendMessage(c.process, "", []types.Tag{{Name: "Action", Value: "Release"}}, dataItemId, c.signer)
+	_, err := c.ao.SendMessage(c.process, "", []tag.Tag{{Name: "Action", Value: "Release"}}, dataItemId, c.signer)
 	return err
 }
 
 func (c *Contract) Stake(url string) (string, error) {
-	mId, err := c.ao.SendMessage(c.process, "", []types.Tag{{Name: "Action", Value: "Stake"}, {Name: "Url", Value: url}}, "", c.signer)
+	mId, err := c.ao.SendMessage(c.process, "", []tag.Tag{{Name: "Action", Value: "Stake"}, {Name: "Url", Value: url}}, "", c.signer)
 	if err != nil {
 		return "", err
 	}
@@ -132,7 +132,7 @@ func (c *Contract) Stake(url string) (string, error) {
 }
 
 func (c *Contract) Staked() (string, error) {
-	tags := []types.Tag{
+	tags := []tag.Tag{
 		{Name: "Action", Value: "Staked"},
 	}
 	res, err := c.ao.DryRun(aogo.Message{Target: c.process, Data: c.signer.Address, Owner: c.signer.Address, Tags: tags})
@@ -143,7 +143,7 @@ func (c *Contract) Staked() (string, error) {
 }
 
 func (c *Contract) Stakers() (*[]Staker, error) {
-	tags := []types.Tag{
+	tags := []tag.Tag{
 		{Name: "Action", Value: "Stakers"},
 	}
 	res, err := c.aoAction("", tags)
@@ -159,12 +159,12 @@ func (c *Contract) Stakers() (*[]Staker, error) {
 }
 
 func (c *Contract) Transfer(recipient string, quantity string) error {
-	_, err := c.ao.SendMessage(c.process, "", []types.Tag{{Name: "Action", Value: "Transfer"}, {Name: "Recipient", Value: recipient}, {Name: "Quantity", Value: quantity}}, "", c.signer)
+	_, err := c.ao.SendMessage(c.process, "", []tag.Tag{{Name: "Action", Value: "Transfer"}, {Name: "Recipient", Value: recipient}, {Name: "Quantity", Value: quantity}}, "", c.signer)
 	return err
 }
 
 func (c *Contract) Unstake() (string, error) {
-	mId, err := c.ao.SendMessage(c.process, "", []types.Tag{{Name: "Action", Value: "Unstake"}}, "", c.signer)
+	mId, err := c.ao.SendMessage(c.process, "", []tag.Tag{{Name: "Action", Value: "Unstake"}}, "", c.signer)
 	if err != nil {
 		return "", err
 	}
@@ -180,7 +180,7 @@ func (c *Contract) Unstake() (string, error) {
 }
 
 func (c *Contract) Upload(id string) (*Upload, error) {
-	tags := []types.Tag{
+	tags := []tag.Tag{
 		{Name: "Action", Value: "Stakers"},
 	}
 	res, err := c.aoAction(id, tags)

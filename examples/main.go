@@ -4,8 +4,8 @@ import (
 	"log"
 
 	"github.com/liteseed/goar/signer"
-	"github.com/liteseed/goar/tx"
-	"github.com/liteseed/goar/types"
+	"github.com/liteseed/goar/tag"
+	"github.com/liteseed/goar/transaction/data_item"
 	"github.com/liteseed/sdk-go/contract"
 )
 
@@ -77,16 +77,12 @@ func main() {
 	}
 	log.Printf("Balances: %s\n", balances)
 
-	dataItem, err := tx.NewDataItem([]byte{1, 2, 3}, user.Address, "", []types.Tag{})
+	dataItem := data_item.New([]byte{1, 2, 3}, user.Address, "", []tag.Tag{})
+
+	err = dataItem.Sign(user)
 	if err != nil {
 		log.Println(err)
 	}
-
-	err = user.SignDataItem(dataItem)
-	if err != nil {
-		log.Println(err)
-	}
-
 
 	staker, err := c.Initiate(dataItem.ID, len(dataItem.Raw))
 	if err != nil {
