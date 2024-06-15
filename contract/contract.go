@@ -30,12 +30,12 @@ func New(process string, signer *signer.Signer) *Contract {
 }
 
 func (c *Contract) aoAction(data string, tags []tag.Tag) ([]byte, error) {
-	mId, err := c.ao.SendMessage(c.process, data, tags, "", c.signer)
+	mID, err := c.ao.SendMessage(c.process, data, tags, "", c.signer)
 	if err != nil {
 		return nil, err
 	}
 
-	result, err := c.ao.LoadResult(c.process, mId)
+	result, err := c.ao.LoadResult(c.process, mID)
 	if err != nil {
 		return nil, err
 	}
@@ -89,10 +89,9 @@ func (c *Contract) Balances() (*map[string]string, error) {
 	return &balances, nil
 }
 
-func (c *Contract) Initiate(dataItemID string, paymentID string, size int) (*Staker, error) {
+func (c *Contract) Initiate(dataItemID string, size int) (*Staker, error) {
 	tags := []tag.Tag{
 		{Name: "Action", Value: "Initiate"},
-		{Name: "Payment", Value: paymentID},
 		{Name: "Size", Value: fmt.Sprint(size)},
 	}
 	res, err := c.aoAction(dataItemID, tags)
@@ -107,22 +106,27 @@ func (c *Contract) Initiate(dataItemID string, paymentID string, size int) (*Sta
 	return &staker, nil
 }
 
-func (c *Contract) Posted(dataItemId string, transactionId string) error {
-	_, err := c.ao.SendMessage(c.process, "", []tag.Tag{{Name: "Action", Value: "Posted"}, {Name: "Transaction", Value: transactionId}}, dataItemId, c.signer)
+func (c *Contract) Pay(ID string, paymentID string) error {
+	_, err := c.ao.SendMessage(c.process, ID, []tag.Tag{{Name: "Action", Value: "Pay"}, {Name: "Payment", Value: paymentID}}, "", c.signer)
 	return err
 }
 
-func (c *Contract) Release(dataItemId string, transactionId string) error {
-	_, err := c.ao.SendMessage(c.process, "", []tag.Tag{{Name: "Action", Value: "Release"}}, dataItemId, c.signer)
+func (c *Contract) Posted(dataItemID string, transactionID string) error {
+	_, err := c.ao.SendMessage(c.process, dataItemID, []tag.Tag{{Name: "Action", Value: "Posted"}, {Name: "Transaction", Value: transactionID}}, "", c.signer)
+	return err
+}
+
+func (c *Contract) Release(dataItemID string, transactionID string) error {
+	_, err := c.ao.SendMessage(c.process, dataItemID, []tag.Tag{{Name: "Action", Value: "Release"}}, dataItemID, c.signer)
 	return err
 }
 
 func (c *Contract) Stake(url string) (string, error) {
-	mId, err := c.ao.SendMessage(c.process, "", []tag.Tag{{Name: "Action", Value: "Stake"}, {Name: "Url", Value: url}}, "", c.signer)
+	mID, err := c.ao.SendMessage(c.process, "", []tag.Tag{{Name: "Action", Value: "Stake"}, {Name: "Url", Value: url}}, "", c.signer)
 	if err != nil {
 		return "", err
 	}
-	result, err := c.ao.LoadResult(c.process, mId)
+	result, err := c.ao.LoadResult(c.process, mID)
 	if err != nil {
 		return "", err
 	}
@@ -165,12 +169,12 @@ func (c *Contract) Transfer(recipient string, quantity string) error {
 }
 
 func (c *Contract) Unstake() (string, error) {
-	mId, err := c.ao.SendMessage(c.process, "", []tag.Tag{{Name: "Action", Value: "Unstake"}}, "", c.signer)
+	mID, err := c.ao.SendMessage(c.process, "", []tag.Tag{{Name: "Action", Value: "Unstake"}}, "", c.signer)
 	if err != nil {
 		return "", err
 	}
 
-	result, err := c.ao.LoadResult(c.process, mId)
+	result, err := c.ao.LoadResult(c.process, mID)
 	if err != nil {
 		return "", err
 	}
@@ -180,11 +184,8 @@ func (c *Contract) Unstake() (string, error) {
 	return result.Messages[0]["Data"].(string), nil
 }
 
-func (c *Contract) Upload(id string) (*Upload, error) {
-	tags := []tag.Tag{
-		{Name: "Action", Value: "Stakers"},
-	}
-	res, err := c.aoAction(id, tags)
+func (c *Contract) Upload(ID string) (*Upload, error) {
+	res, err := c.aoAction(ID, []tag.Tag{{Name: "Action", Value: "Upload"}})
 	if err != nil {
 		return nil, err
 	}

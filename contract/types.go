@@ -11,7 +11,7 @@ type Upload struct {
 	Status      string `json:"status"`
 	Bundler     string `json:"bundler"`
 	Transaction string `json:"transaction"`
-	Paid        string `json:"paid"`
+	Payment     string `json:"payment"`
 }
 
 type Info struct {

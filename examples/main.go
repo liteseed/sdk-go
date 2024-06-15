@@ -6,6 +6,7 @@ import (
 	"github.com/liteseed/goar/signer"
 	"github.com/liteseed/goar/tag"
 	"github.com/liteseed/goar/transaction/data_item"
+	"github.com/liteseed/goar/wallet"
 	"github.com/liteseed/sdk-go/contract"
 )
 
@@ -57,13 +58,13 @@ func main() {
 	}
 	log.Println(staked)
 
-	user, err := signer.FromPath("./examples/user.json")
+	user, err := wallet.FromPath("./examples/user.json", "https://arweave.net")
 	if err != nil {
 		log.Fatal(err)
 	}
-	log.Printf("Signer: %s\n", user.Address)
+	log.Printf("Signer: %s\n", user.Signer.Address)
 
-	c := contract.New(PROCESS, user)
+	c := contract.New(PROCESS, user.Signer)
 
 	balance, err := c.Balance(PROCESS)
 	if err != nil {
@@ -77,16 +78,33 @@ func main() {
 	}
 	log.Printf("Balances: %s\n", balances)
 
-	dataItem := data_item.New([]byte{1, 2, 3}, user.Address, "", []tag.Tag{})
+	dataItem := data_item.New([]byte{1, 2, 3}, user.Signer.Address, "", []tag.Tag{})
 
-	err = dataItem.Sign(user)
+	err = dataItem.Sign(user.Signer)
 	if err != nil {
 		log.Println(err)
 	}
 
-	staker, err := c.Initiate(dataItem.ID, "payment-id", len(dataItem.Raw))
+	staker, err := c.Initiate(dataItem.ID, len(dataItem.Raw))
 	if err != nil {
 		log.Println(err)
 	}
 	log.Println(staker)
+
+	tx := user.CreateTransaction(nil, "", "100000", nil)
+	_, err = user.SignTransaction(tx)
+	if err != nil {
+		log.Println(err)
+	}
+
+	err = c.Pay(dataItem.ID, tx.ID)
+	if err != nil {
+		log.Println(err)
+	}
+
+	upload, err := c.Upload(dataItem.ID)
+	if err != nil {
+		log.Println(err)
+	}
+	log.Println(upload)
 }
