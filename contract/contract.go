@@ -89,12 +89,13 @@ func (c *Contract) Balances() (*map[string]string, error) {
 	return &balances, nil
 }
 
-func (c *Contract) Initiate(dataItemId string, size int) (*Staker, error) {
+func (c *Contract) Initiate(dataItemID string, paymentID string, size int) (*Staker, error) {
 	tags := []tag.Tag{
 		{Name: "Action", Value: "Initiate"},
+		{Name: "Payment", Value: paymentID},
 		{Name: "Size", Value: fmt.Sprint(size)},
 	}
-	res, err := c.aoAction(dataItemId, tags)
+	res, err := c.aoAction(dataItemID, tags)
 	if err != nil {
 		return nil, err
 	}

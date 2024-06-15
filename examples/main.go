@@ -84,7 +84,7 @@ func main() {
 		log.Println(err)
 	}
 
-	staker, err := c.Initiate(dataItem.ID, len(dataItem.Raw))
+	staker, err := c.Initiate(dataItem.ID, "payment-id", len(dataItem.Raw))
 	if err != nil {
 		log.Println(err)
 	}
