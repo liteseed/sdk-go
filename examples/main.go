@@ -46,7 +46,7 @@ func main() {
 	}
 	log.Println(staked)
 
-	stakeResp, err := cb.Stake("localhost.com")
+	stakeResp, err := cb.Stake("localhost:8080")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -102,9 +102,8 @@ func main() {
 		log.Println(err)
 	}
 
-	upload, err := c.Upload(dataItem.ID)
+	err = c.Posted(dataItem.ID)
 	if err != nil {
 		log.Println(err)
 	}
-	log.Println(upload)
 }

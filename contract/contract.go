@@ -10,6 +10,21 @@ import (
 	"github.com/liteseed/goar/tag"
 )
 
+type IContract interface {
+	Info() (*Info, error)
+	Balance(target string) (string, error)
+	Balances() (*map[string]string, error)
+	Transfer(recipient string, quantity string) error
+	Initiate(dataItemID string, size int) (*Staker, error)
+	Pay(ID string, paymentID string) error
+	Posted(dataItemID string) error
+	Release(dataItemID string) error
+	Stake(url string) (string, error)
+	Unstake() (string, error)
+	Staked() (string, error)
+	Stakers() (*[]Staker, error)
+}
+
 type Contract struct {
 	ao      *aogo.AO
 	process string
@@ -22,6 +37,14 @@ func New(process string, signer *signer.Signer) *Contract {
 		log.Fatal(err)
 	}
 
+	return &Contract{
+		ao:      ao,
+		process: process,
+		signer:  signer,
+	}
+}
+
+func Custom(ao *aogo.AO, process string, signer *signer.Signer) *Contract {
 	return &Contract{
 		ao:      ao,
 		process: process,
@@ -111,12 +134,12 @@ func (c *Contract) Pay(ID string, paymentID string) error {
 	return err
 }
 
-func (c *Contract) Posted(dataItemID string, transactionID string) error {
-	_, err := c.ao.SendMessage(c.process, dataItemID, []tag.Tag{{Name: "Action", Value: "Posted"}, {Name: "Transaction", Value: transactionID}}, "", c.signer)
+func (c *Contract) Posted(dataItemID string) error {
+	_, err := c.ao.SendMessage(c.process, dataItemID, []tag.Tag{{Name: "Action", Value: "Posted"}}, "", c.signer)
 	return err
 }
 
-func (c *Contract) Release(dataItemID string, transactionID string) error {
+func (c *Contract) Release(dataItemID string) error {
 	_, err := c.ao.SendMessage(c.process, dataItemID, []tag.Tag{{Name: "Action", Value: "Release"}}, dataItemID, c.signer)
 	return err
 }
@@ -182,17 +205,4 @@ func (c *Contract) Unstake() (string, error) {
 		return "", fmt.Errorf(result.Error)
 	}
 	return result.Messages[0]["Data"].(string), nil
-}
-
-func (c *Contract) Upload(ID string) (*Upload, error) {
-	res, err := c.aoAction(ID, []tag.Tag{{Name: "Action", Value: "Upload"}})
-	if err != nil {
-		return nil, err
-	}
-	var upload Upload
-	err = json.Unmarshal(res, &upload)
-	if err != nil {
-		return nil, err
-	}
-	return &upload, nil
 }
