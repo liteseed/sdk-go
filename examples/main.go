@@ -78,7 +78,7 @@ func main() {
 	}
 	log.Printf("Balances: %s\n", balances)
 
-	dataItem := data_item.New([]byte{1, 2, 3}, user.Signer.Address, "", []tag.Tag{})
+	dataItem := data_item.New([]byte{1, 2, 3}, user.Signer.Address, "", &[]tag.Tag{})
 
 	err = dataItem.Sign(user.Signer)
 	if err != nil {
