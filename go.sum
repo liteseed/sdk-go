@@ -9,10 +9,10 @@ github.com/golang/snappy v0.0.5-0.20220116011046-fa5810519dcb h1:PBC98N2aIaM3XXi
 github.com/golang/snappy v0.0.5-0.20220116011046-fa5810519dcb/go.mod h1:/XxbfmMg8lxefKM7IXC3fBNl/7bRcc72aCRzEWrmP2Q=
 github.com/linkedin/goavro/v2 v2.13.0 h1:L8eI8GcuciwUkt41Ej62joSZS4kKaYIUdze+6for9NU=
 github.com/linkedin/goavro/v2 v2.13.0/go.mod h1:KXx+erlq+RPlGSPmLF7xGo6SAbh8sCQ53x064+ioxhk=
-github.com/liteseed/aogo v0.2.0 h1:anrZH35OV4LdjVQWAznklizg3lNqbACxs6HSFdApciE=
-github.com/liteseed/aogo v0.2.0/go.mod h1:OWP+7qgQ9mWKG80Re3Jy8gzmDdw0E5gKGRHTluPcVTk=
-github.com/liteseed/goar v0.2.3 h1:HVcq5T4TYrHrN4No/AJhNHOFZurl2WE/IebRRY3Js/w=
-github.com/liteseed/goar v0.2.3/go.mod h1:NFCfsaLf2/LgRUwSvbijbt1OdjXvsanJx0efoKfs0Lo=
+github.com/liteseed/aogo v0.2.1 h1:jlkW7j2+R2fIjYMtUDP/SFI+gobXvTCG43Q5RB5VL4U=
+github.com/liteseed/aogo v0.2.1/go.mod h1:Wlx1Z/bU3Jol9IXLebBEGbcyL5YiQ4/JM6fEcsrNs00=
+github.com/liteseed/goar v0.2.4 h1:fnra/X84zqYNhD7KdPigkhGs8mf6vrwHvvUhEjIOJoQ=
+github.com/liteseed/goar v0.2.4/go.mod h1:NFCfsaLf2/LgRUwSvbijbt1OdjXvsanJx0efoKfs0Lo=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 h1:Jamvg5psRIccs7FGNTlIRMkT8wgtp5eCXdBlqhYGL6U=
 github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
