@@ -3,8 +3,8 @@ module github.com/liteseed/sdk-go
 go 1.22.1
 
 require (
-	github.com/liteseed/aogo v0.2.3
-	github.com/liteseed/goar v0.2.6
+	github.com/liteseed/aogo v0.2.4
+	github.com/liteseed/goar v0.2.7
 	github.com/stretchr/testify v1.9.0
 )
 
