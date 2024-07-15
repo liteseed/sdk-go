@@ -23,6 +23,12 @@ func main() {
 
 	cb := contract.New(PROCESS, bundler)
 
+	bs, err := cb.Balance(bundler.Address)
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Println(bs)
+
 	info, err := cb.Info()
 	if err != nil {
 		log.Fatal(err)

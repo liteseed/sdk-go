@@ -93,7 +93,12 @@ func (c *Contract) Balance(target string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return res.Messages[0]["Data"].(string), nil
+	b := res.Messages[0]["Data"]
+	if b == nil {
+		return "0", nil
+	} else {
+		return res.Messages[0]["Data"].(string), nil
+	}
 }
 
 func (c *Contract) Balances() (*map[string]string, error) {
